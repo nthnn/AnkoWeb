@@ -28,7 +28,7 @@ func parseAwpFile(fileName string, fileContent string) (string, error) {
 			hasPrevLt = false
 			insideAnko = true
 
-			parsed += "\")"
+			parsed += "\");"
 			idx += 1
 			continue
 		} else if hasPrevPr && current == '>' {
@@ -67,13 +67,11 @@ func parseAwpFile(fileName string, fileContent string) (string, error) {
 		}
 
 		if current == '"' && !insideAnko {
-			parsed += "\""
+			parsed += "\\\""
+		} else if current == '\n' && !insideAnko {
+			parsed += "\\n"
 		} else {
-			if current == '\n' && !insideAnko {
-				parsed += "\\n"
-			} else {
-				parsed += string(current)
-			}
+			parsed += string(current)
 		}
 
 		idx += 1
