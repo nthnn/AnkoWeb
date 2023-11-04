@@ -2,6 +2,11 @@ package main
 
 import (
 	"errors"
+	"log"
+	"net/http"
+
+	"github.com/mattn/anko/env"
+	"github.com/mattn/anko/vm"
 )
 
 func parseAwpFile(fileName string, fileContent string) (string, error) {
@@ -17,7 +22,7 @@ func parseAwpFile(fileName string, fileContent string) (string, error) {
 
 		if hasPrevLt && current == '%' {
 			if insideAnko {
-				return "", errors.New("Already inside Anko context.")
+				return "", errors.New("already inside Anko context")
 			}
 
 			hasPrevLt = false
@@ -28,7 +33,7 @@ func parseAwpFile(fileName string, fileContent string) (string, error) {
 			continue
 		} else if hasPrevPr && current == '>' {
 			if !insideAnko {
-				return "", errors.New("Enclosing Anko outside context.")
+				return "", errors.New("enclosing Anko outside context")
 			}
 
 			hasPrevPr = false
@@ -64,16 +69,46 @@ func parseAwpFile(fileName string, fileContent string) (string, error) {
 		if current == '"' && !insideAnko {
 			parsed += "\""
 		} else {
-			parsed += string(current)
+			if current == '\n' && !insideAnko {
+				parsed += "\\n"
+			} else {
+				parsed += string(current)
+			}
 		}
 
 		idx += 1
 	}
 
 	if insideAnko {
-		return "", errors.New("Unenclosed Anko context, encountered end-of-file.")
+		return "", errors.New("unenclosed Anko context, encountered end-of-file")
 	}
 
 	parsed += "\")"
 	return parsed, nil
+}
+
+func echoFn(w http.ResponseWriter) func(message string) {
+	return func(message string) {
+		w.Write([]byte(message))
+	}
+}
+
+func runScript(fileName string, fileContents string, w http.ResponseWriter) {
+	parsed, err := parseAwpFile("", fileContents)
+	if err != nil {
+		log.Fatal("Error: ", err)
+		return
+	}
+
+	vmEnv := env.NewEnv()
+	if err = vmEnv.Define("echo", echoFn(w)); err != nil {
+		log.Fatal("Error: ", err)
+		return
+	}
+
+	_, err = vm.Execute(vmEnv, nil, parsed)
+	if err != nil {
+		log.Fatal("Execution error: ", err)
+		return
+	}
 }

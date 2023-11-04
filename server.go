@@ -30,7 +30,12 @@ func requestHandler(path string) func(w http.ResponseWriter, r *http.Request) {
 
 		fileContents, contentType := getContentMimeType(path + "/" + fileName)
 		w.Header().Set("Content-Type", contentType)
-		w.Write(fileContents)
+
+		if strings.HasSuffix(fileName, ".awp") {
+			runScript(fileName, string(fileContents), w)
+		} else {
+			w.Write(fileContents)
+		}
 	}
 }
 
@@ -41,12 +46,13 @@ func serverFileExists(path string, file string) bool {
 
 func handleNotFound(path string, w http.ResponseWriter, r *http.Request) {
 	if serverFileExists(path, "404.awp") {
-		http.NotFound(w, r)
+		fileContents, _ := ioutil.ReadFile(path + "/" + "404.awp")
+		runScript("404.awp", string(fileContents), w)
+
 		return
 	}
 
-	w.Header().Set("Content-Type", "text/plain")
-	w.Write([]byte("404 Not Found"))
+	http.NotFound(w, r)
 }
 
 func getContentMimeType(fileName string) ([]byte, string) {
