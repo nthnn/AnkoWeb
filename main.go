@@ -20,7 +20,7 @@ func main() {
 	path := flag.String("path", ".", "Working directory for the server.")
 	host := flag.String("host", "", "Name of the localhost server.")
 	port := flag.Int("port", 1234, "Port of the localhost server.")
-
 	initFlags()
+
 	awpServer(*path, *host, int16(*port))
 }
