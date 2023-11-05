@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strconv"
 	"time"
+
+	"github.com/fatih/color"
 )
 
 func timeNow() string {
@@ -20,6 +22,11 @@ func timeNow() string {
 	now += strconv.Itoa(int(current.UnixMilli()))[0:3]
 
 	return now
+}
+
+func colorize(fgColor color.Attribute) func(a ...interface{}) (int, error) {
+	c := color.New(fgColor)
+	return c.Print
 }
 
 func printMessage(message string) {

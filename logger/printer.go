@@ -5,15 +5,16 @@ import (
 )
 
 func Plain(message string) {
-	c := color.New(color.FgGreen)
-	c.Print("[" + timeNow() + "]")
-
+	colorize(color.FgGreen)("[" + timeNow() + "]")
 	printMessage(message)
 }
 
 func Error(message string) {
-	c := color.New(color.FgRed)
-	c.Print("[" + timeNow() + "]")
+	colorize(color.FgRed)("[" + timeNow() + "]")
+	printMessage(message)
+}
 
+func Info(message string) {
+	colorize(color.FgCyan)("[" + timeNow() + "]")
 	printMessage(message)
 }
