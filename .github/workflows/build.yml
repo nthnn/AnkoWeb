@@ -24,4 +24,4 @@ jobs:
         run: ./build.sh
 
       - name: Checking AnkoWeb build
-        run: ./bin/ankoweb
+        run: ./bin/ankoweb -help
