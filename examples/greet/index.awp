@@ -1,0 +1,12 @@
+<style>
+    h1 {
+        margin-top: 24%;
+        font-family: Tahoma;
+    }
+</style>
+<%
+
+include("say.awp");
+say("<h1 align=\"center\">Hello, from AnkoWeb!</h1>");
+
+%>
