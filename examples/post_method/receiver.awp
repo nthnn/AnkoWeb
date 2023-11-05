@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<head>
+    <title>Form POST Example</title>
+
+    <style>
+        * {font-family: Tahoma}
+        h2 {margin-top: 21%}
+
+        a {
+            text-decoration: none;
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <center>
+        <h2>Hello, <% echo(httpRemote()["post_data"]["name"]); %>!</h2>
+        <a href="/">&lt; Go Back</a>
+    </center>
+</body>
+</html>

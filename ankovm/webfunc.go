@@ -2,8 +2,10 @@ package ankovm
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/mattn/anko/env"
 	"github.com/mattn/anko/parser"
@@ -58,6 +60,7 @@ func httpHeaderFn(r *http.Request) func() map[string][]string {
 func httpRemoteFn(r *http.Request) func() map[string]interface{} {
 	return func() map[string]interface{} {
 		dict := make(map[string]interface{})
+		body, err := io.ReadAll(r.Body)
 
 		dict["method"] = r.Method
 		dict["host"] = r.Host
@@ -67,8 +70,37 @@ func httpRemoteFn(r *http.Request) func() map[string]interface{} {
 		dict["encoding"] = r.TransferEncoding
 		dict["url"] = r.URL.String()
 		dict["form"] = r.Form
-		dict["post_data"] = r.PostForm
 		dict["cookies"] = r.Cookies()
+
+		if err == nil {
+			body := string(body)
+			dict["body"] = body
+		}
+
+		if r.Method == "POST" && dict["body"] != nil {
+			entries := strings.Split(string(body), "&")
+			post := make(map[string]string)
+
+			for i := 0; i < len(entries); i++ {
+				pair := strings.Split(entries[i], "=")
+				post[pair[0]] = pair[1]
+			}
+
+			dict["post_data"] = post
+		} else if r.Method == "GET" {
+			content := r.RequestURI
+			content = content[strings.Index(content, "?")+1:]
+
+			entries := strings.Split(content, "&")
+			get := make(map[string]string)
+
+			for i := 0; i < len(entries); i++ {
+				pair := strings.Split(entries[i], "=")
+				get[pair[0]] = pair[1]
+			}
+
+			dict["get_data"] = get
+		}
 
 		return dict
 	}
