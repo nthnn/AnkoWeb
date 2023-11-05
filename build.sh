@@ -1,1 +1,1 @@
-go build -ldflags "-s -w" -o ../bin/ankoweb
+go build -ldflags "-s -w" -o ./bin/ankoweb
