@@ -1,11 +1,12 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/nthnn/AnkoWeb/logger"
 )
 
 func requestHandler(path string) func(w http.ResponseWriter, r *http.Request) {
@@ -71,10 +72,10 @@ func awpServer(path string, host string, port int16) {
 	http.HandleFunc("/", requestHandler(path))
 
 	addr := host + ":" + strconv.Itoa(int(port))
-	log.Println("Server is running on " + addr)
+	logger.Plain("Server is running on " + addr)
 
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
-		log.Panic("Error: ", err)
+		logger.Error("Error: " + err.Error())
 	}
 }

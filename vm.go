@@ -3,12 +3,12 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 	"net/http"
 	"os"
 
 	"github.com/mattn/anko/env"
 	"github.com/mattn/anko/vm"
+	"github.com/nthnn/AnkoWeb/logger"
 )
 
 func parseAwpFile(fileName string, fileContent string) (string, error) {
@@ -97,19 +97,19 @@ func includeFn(ctx *context.Context, vmEnv *env.Env, path string) func(fileName 
 	return func(fileName string) {
 		fileContents, err := os.ReadFile(path + "/" + fileName)
 		if err != nil {
-			log.Panic("Error: ", err)
+			logger.Error("Error: " + err.Error())
 			return
 		}
 
 		parsed, err := parseAwpFile("", string(fileContents))
 		if err != nil {
-			log.Panic("Error: ", err)
+			logger.Error("Error: " + err.Error())
 			return
 		}
 
 		_, err = vm.ExecuteContext(*ctx, vmEnv, nil, parsed)
 		if err != nil {
-			log.Panic("Execution error: ", err)
+			logger.Error("Execution error: " + err.Error())
 			return
 		}
 	}
@@ -120,24 +120,24 @@ func runScript(path string, fileName string, fileContents string, w http.Respons
 
 	parsed, err := parseAwpFile(fileName, fileContents)
 	if err != nil {
-		log.Panic("Error: ", err)
+		logger.Error("Error: " + err.Error())
 		return
 	}
 
 	vmEnv := env.NewEnv()
 	if err = vmEnv.Define("echo", echoFn(w)); err != nil {
-		log.Panic("Error: ", err)
+		logger.Error("Error: " + err.Error())
 		return
 	}
 
 	if err = vmEnv.Define("include", includeFn(&ctx, vmEnv, path)); err != nil {
-		log.Panic("Error: ", err)
+		logger.Error("Error: " + err.Error())
 		return
 	}
 
 	_, err = vm.ExecuteContext(ctx, vmEnv, nil, parsed)
 	if err != nil {
-		log.Panic("Execution error: ", err)
+		logger.Error("Execution error: " + err.Error())
 		return
 	}
 }
