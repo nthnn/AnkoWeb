@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"time"
-
 	"github.com/fatih/color"
 )
 
@@ -15,7 +13,7 @@ func Plain(message string) {
 
 func Error(message string) {
 	c := color.New(color.FgRed)
-	c.Print(time.Now().String())
+	c.Print("[" + timeNow() + "]")
 
 	printMessage(message)
 }
