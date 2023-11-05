@@ -1,11 +1,11 @@
 package ankovm
 
 import (
-	"context"
 	"errors"
 	"net/http"
 
 	"github.com/mattn/anko/env"
+	"github.com/mattn/anko/parser"
 	"github.com/mattn/anko/vm"
 	"github.com/nthnn/AnkoWeb/logger"
 )
@@ -87,8 +87,6 @@ func parseAwpFile(fileName string, fileContent string) (string, error) {
 }
 
 func RunScript(path string, fileName string, fileContents string, w http.ResponseWriter, r *http.Request) {
-	ctx := context.WithoutCancel(context.Background())
-
 	parsed, err := parseAwpFile(fileName, fileContents)
 	if err != nil {
 		logger.Error("Error: " + err.Error())
@@ -96,11 +94,17 @@ func RunScript(path string, fileName string, fileContents string, w http.Respons
 	}
 
 	vmEnv := env.NewEnv()
-	installDefaults(&ctx, vmEnv, path, w, r)
+	installDefaults(vmEnv, path, w, r)
 
-	_, err = vm.ExecuteContext(ctx, vmEnv, nil, parsed)
+	_, err = parser.ParseSrc(parsed)
 	if err != nil {
-		logger.Error("Execution error: " + err.Error())
+		logger.Error("Parser error: " + err.Error() + " (" + fileName + ")")
+		return
+	}
+
+	_, err = vm.Execute(vmEnv, nil, parsed)
+	if err != nil {
+		logger.Error("Execution error: " + err.Error() + " (" + fileName + ")")
 		return
 	}
 }

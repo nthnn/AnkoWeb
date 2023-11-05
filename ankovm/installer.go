@@ -1,26 +1,22 @@
 package ankovm
 
 import (
-	"context"
 	"net/http"
 
 	"github.com/mattn/anko/env"
 	"github.com/nthnn/AnkoWeb/logger"
 )
 
-func installDefaults(ctx *context.Context, vmEnv *env.Env, path string, w http.ResponseWriter, r *http.Request) {
-	if err := vmEnv.Define("echo", echoFn(w)); err != nil {
+func installDefinition(vmEnv *env.Env, symbol string, value interface{}) {
+	if err := vmEnv.Define(symbol, value); err != nil {
 		logger.Error("Error: " + err.Error())
-		return
 	}
+}
 
-	if err := vmEnv.Define("include", includeFn(ctx, vmEnv, path)); err != nil {
-		logger.Error("Error: " + err.Error())
-		return
-	}
+func installDefaults(vmEnv *env.Env, path string, w http.ResponseWriter, r *http.Request) {
+	installDefinition(vmEnv, "echo", echoFn(w))
+	installDefinition(vmEnv, "include", includeFn(vmEnv, path))
 
-	if err := vmEnv.Define("httpHeaders", httpHeaderFn(r)); err != nil {
-		logger.Error("Error: " + err.Error())
-		return
-	}
+	installDefinition(vmEnv, "httpHeaders", httpHeaderFn(r))
+	installDefinition(vmEnv, "httpRemote", httpRemoteFn(r))
 }
