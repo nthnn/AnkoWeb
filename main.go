@@ -5,14 +5,33 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/fatih/color"
 	"github.com/nthnn/AnkoWeb/server"
 )
+
+func printBanner() {
+	color.New(color.FgHiBlue).Print(`
+█████╗ ███╗   ██╗██╗  ██╗ ██████╗ ██╗    ██╗███████╗██████╗ 
+██╔══██╗████╗  ██║██║ ██╔╝██╔═══██╗██║    ██║██╔════╝██╔══██╗
+███████║██╔██╗ ██║█████╔╝ ██║   ██║██║ █╗ ██║█████╗  ██████╔╝
+██╔══██║██║╚██╗██║██╔═██╗ ██║   ██║██║███╗██║██╔══╝  ██╔══██╗
+██║  ██║██║ ╚████║██║  ██╗╚██████╔╝╚███╔███╔╝███████╗██████╔╝
+╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═════╝  ╚══╝╚══╝ ╚══════╝╚═════╝ 
+                                                             
+`,
+	)
+}
 
 func initFlags() {
 	flag.CommandLine.SetOutput(os.Stdout)
 
 	flag.Usage = func() {
-		fmt.Println("AnkoWeb v0.0.1 - Primitive Version\n\nParameters:")
+		printBanner()
+
+		color.New(color.FgHiYellow).Print("              AnkoWeb v0.0.1 - Primitive Version\n\n")
+
+		fmt.Println("–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––")
+		fmt.Println("Parameters:")
 		flag.PrintDefaults()
 	}
 	flag.Parse()
