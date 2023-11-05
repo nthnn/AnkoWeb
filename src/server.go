@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -32,7 +31,7 @@ func requestHandler(path string) func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", contentType)
 
 		if strings.HasSuffix(fileName, ".awp") {
-			runScript(fileName, string(fileContents), w)
+			runScript(path, fileName, string(fileContents), w)
 		} else {
 			w.Write(fileContents)
 		}
@@ -46,8 +45,8 @@ func serverFileExists(path string, file string) bool {
 
 func handleNotFound(path string, w http.ResponseWriter, r *http.Request) {
 	if serverFileExists(path, "404.awp") {
-		fileContents, _ := ioutil.ReadFile(path + "/" + "404.awp")
-		runScript("404.awp", string(fileContents), w)
+		fileContents, _ := os.ReadFile(path + "/" + "404.awp")
+		runScript(path, "404.awp", string(fileContents), w)
 
 		return
 	}
@@ -56,7 +55,7 @@ func handleNotFound(path string, w http.ResponseWriter, r *http.Request) {
 }
 
 func getContentMimeType(fileName string) ([]byte, string) {
-	fileContents, _ := ioutil.ReadFile(fileName)
+	fileContents, _ := os.ReadFile(fileName)
 	contentType := ""
 
 	if strings.HasSuffix(fileName, ".awp") {
@@ -76,6 +75,6 @@ func awpServer(path string, host string, port int16) {
 
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
-		log.Fatal("Error: ", err)
+		log.Panic("Error: ", err)
 	}
 }
