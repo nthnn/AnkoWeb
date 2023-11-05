@@ -2,6 +2,7 @@ package ankovm
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 
@@ -35,5 +36,12 @@ func includeFn(ctx *context.Context, vmEnv *env.Env, path string) func(fileName 
 			logger.Error("Execution error: " + err.Error())
 			return
 		}
+	}
+}
+
+func httpHeaderFn(r *http.Request) func() map[string][]string {
+	return func() map[string][]string {
+		fmt.Println(r.Header)
+		return r.Header
 	}
 }

@@ -86,7 +86,7 @@ func parseAwpFile(fileName string, fileContent string) (string, error) {
 	return parsed, nil
 }
 
-func RunScript(path string, fileName string, fileContents string, w http.ResponseWriter) {
+func RunScript(path string, fileName string, fileContents string, w http.ResponseWriter, r *http.Request) {
 	ctx := context.WithoutCancel(context.Background())
 
 	parsed, err := parseAwpFile(fileName, fileContents)
@@ -96,15 +96,7 @@ func RunScript(path string, fileName string, fileContents string, w http.Respons
 	}
 
 	vmEnv := env.NewEnv()
-	if err = vmEnv.Define("echo", echoFn(w)); err != nil {
-		logger.Error("Error: " + err.Error())
-		return
-	}
-
-	if err = vmEnv.Define("include", includeFn(&ctx, vmEnv, path)); err != nil {
-		logger.Error("Error: " + err.Error())
-		return
-	}
+	installDefaults(&ctx, vmEnv, path, w, r)
 
 	_, err = vm.ExecuteContext(ctx, vmEnv, nil, parsed)
 	if err != nil {
