@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"net/http"
 	"os"
 	"strings"
@@ -23,8 +24,9 @@ func requestHandler(path string) func(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+		buff := &bytes.Buffer{}
 		if !serverFileExists(path, fileName) {
-			handleNotFound(path, w, r)
+			handleNotFound(path, buff, w, r)
 			logger.Error(fileName + ": error")
 			return
 		}
@@ -33,7 +35,8 @@ func requestHandler(path string) func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", contentType)
 
 		if strings.HasSuffix(fileName, ".awp") {
-			ankovm.RunScript(path, fileName, string(fileContents), w, r)
+			ankovm.RunScript(path, fileName, string(fileContents), buff, w, r)
+			w.Write(buff.Bytes())
 		} else {
 			w.Write(fileContents)
 		}
@@ -42,10 +45,10 @@ func requestHandler(path string) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleNotFound(path string, w http.ResponseWriter, r *http.Request) {
+func handleNotFound(path string, buff *bytes.Buffer, w http.ResponseWriter, r *http.Request) {
 	if serverFileExists(path, "404.awp") {
 		fileContents, _ := os.ReadFile(path + "/" + "404.awp")
-		ankovm.RunScript(path, "404.awp", string(fileContents), w, r)
+		ankovm.RunScript(path, "404.awp", string(fileContents), buff, w, r)
 
 		return
 	}
