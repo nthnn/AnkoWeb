@@ -1,11 +1,13 @@
 package std
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/mattn/anko/env"
 	"github.com/mattn/anko/parser"
@@ -14,10 +16,10 @@ import (
 	"github.com/nthnn/AnkoWeb/util"
 )
 
-func EchoFn(w http.ResponseWriter) func(value interface{}) {
+func EchoFn(buff *bytes.Buffer) func(value interface{}) {
 	return func(value interface{}) {
 		str := fmt.Sprintf("%v", value)
-		w.Write([]byte(str))
+		buff.WriteString(str)
 	}
 }
 
@@ -104,5 +106,45 @@ func HttpRemoteFn(r *http.Request) func() map[string]interface{} {
 		}
 
 		return dict
+	}
+}
+
+func SetCookieFn(w http.ResponseWriter) func(string, string, int, string) {
+	return func(name, value string, age int, path string) {
+		cookie := http.Cookie{}
+		cookie.Name = name
+		cookie.Value = value
+		cookie.Path = path
+		cookie.MaxAge = age
+
+		http.SetCookie(w, &cookie)
+	}
+}
+
+func GetCookieFn(r *http.Request) func(string) string {
+	return func(name string) string {
+		value := ""
+		cookies := r.Cookies()
+
+		for i := 0; i < len(cookies); i++ {
+			if name == cookies[i].Name {
+				value = cookies[i].Value
+				break
+			}
+		}
+
+		return value
+	}
+}
+
+func DeleteCookieFn(w http.ResponseWriter) func(string, string) {
+	return func(name string, path string) {
+		cookie := http.Cookie{}
+		cookie.Name = name
+		cookie.Value = ""
+		cookie.Path = path
+		cookie.Expires = time.Unix(0, 0)
+
+		http.SetCookie(w, &cookie)
 	}
 }
