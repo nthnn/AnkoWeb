@@ -1,6 +1,7 @@
 package ankovm
 
 import (
+	"bytes"
 	"net/http"
 
 	"github.com/mattn/anko/env"
@@ -10,7 +11,7 @@ import (
 	"github.com/nthnn/AnkoWeb/util"
 )
 
-func RunScript(path string, fileName string, fileContents string, w http.ResponseWriter, r *http.Request) {
+func RunScript(path string, fileName string, fileContents string, buff *bytes.Buffer, w http.ResponseWriter, r *http.Request) {
 	parsed, err := util.ParseAwpFile(fileName, fileContents)
 	if err != nil {
 		logger.Error("Error: " + err.Error())
@@ -18,7 +19,7 @@ func RunScript(path string, fileName string, fileContents string, w http.Respons
 	}
 
 	vmEnv := env.NewEnv()
-	installDefaults(vmEnv, path, w, r)
+	installDefaults(vmEnv, path, buff, w, r)
 
 	_, err = parser.ParseSrc(parsed)
 	if err != nil {
