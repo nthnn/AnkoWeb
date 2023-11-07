@@ -54,6 +54,12 @@ func IncludeFn(vmEnv *env.Env, path string) func(fileName string) {
 	}
 }
 
+func HeaderFn(w http.ResponseWriter) func(name, value string) {
+	return func(name, value string) {
+		w.Header().Add(name, value)
+	}
+}
+
 func HttpHeaderFn(r *http.Request) func() map[string][]string {
 	return func() map[string][]string {
 		return r.Header

@@ -19,6 +19,7 @@ func installWebFunc(vmEnv *env.Env, path string, buff *bytes.Buffer, w http.Resp
 	installDefinition(vmEnv, "echo", std.EchoFn(buff))
 	installDefinition(vmEnv, "include", std.IncludeFn(vmEnv, path))
 
+	installDefinition(vmEnv, "header", std.HeaderFn(w))
 	installDefinition(vmEnv, "httpHeaders", std.HttpHeaderFn(r))
 	installDefinition(vmEnv, "httpRemote", std.HttpRemoteFn(r))
 
